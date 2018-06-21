@@ -11,18 +11,18 @@ import Header from './components/Header'
 import Nav from '@/components/Nav'
 export default {
   name: 'App',
+  data () {
+    return {
+      // 商品数据
+      goodsData: {}
+    }
+  },
   components: {
     'app-header': Header,
     'app-nav': Nav
   },
-  data () {
-    return {
-    }
-  },
   created () {
-    this.$axios.get('/api/goods').then((res) => {
-      console.log(res)
-    })
+    // 获取商品数据
   }
 }
 </script>

@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'mt-app';
-  src:  url('fonts/mt-app.eot?w2jfmc');
-  src:  url('fonts/mt-app.eot?w2jfmc#iefix') format('embedded-opentype'),
-    url('fonts/mt-app.ttf?w2jfmc') format('truetype'),
-    url('fonts/mt-app.woff?w2jfmc') format('woff'),
-    url('fonts/mt-app.svg?w2jfmc#mt-app') format('svg');
+  src:  url('../fonts/mt-app.eot?w2jfmc');
+  src:  url('../fonts/mt-app.eot?w2jfmc#iefix') format('embedded-opentype'),
+    url('../fonts/mt-app.ttf?w2jfmc') format('truetype'),
+    url('../fonts/mt-app.woff?w2jfmc') format('woff'),
+    url('../fonts/mt-app.svg?w2jfmc#mt-app') format('svg');
   font-weight: normal;
   font-style: normal;
 }
