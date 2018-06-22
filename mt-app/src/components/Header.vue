@@ -32,33 +32,88 @@
       <img class="notice-img" v-if="goodsData.discounts2" :src="goodsData.discounts2[0].icon_url" />
       <div class="notice-name" v-if="goodsData.discounts2">{{goodsData.discounts2[0].info}}</div>
       <div class="notice-activity-box">
-        <a href="#" class="notice-activity" v-if="goodsData.discounts2">{{goodsData.discounts2.length}}个活动</a>
+        <a href="#"
+           class="notice-activity"
+           v-if="goodsData.discounts2"
+           @click="toShow">
+          {{goodsData.discounts2.length}}个活动</a>
         <span class="icon-keyboard_arrow_right"></span>
       </div>
     </div>
     <!--公告详情-->
+    <transition name="bulletin-detail">
+      <div class="detail" v-show="isShow">
+        <div class="detail-box">
+          <div class="detail-content" :style="detail_background">
+            <div class="detail-img" :style="theme_background"></div>
+            <div class="detail-name">{{goodsData.name}}</div>
+            <div class="detail-star">
+              <app-star :score="goodsData.wm_poi_score"></app-star>
+              <span>{{goodsData.wm_poi_score}}</span>
+            </div>
+            <div class="detail-tip">
+              {{goodsData.min_price_tip}} <i>|</i> {{goodsData.shipping_fee_tip}} <i>|</i> {{goodsData.delivery_time_tip}}
+            </div>
+            <div class="detail-time">
+              配送时间: {{goodsData.shipping_time}}
+            </div>
+            <div class="detail-discounts" v-if="goodsData.discounts2">
+              <p>
+                <img :src="goodsData.discounts2[0].icon_url" />
+                <span>{{goodsData.discounts2[0].info}}</span>
+              </p>
+            </div>
+          </div>
+          <div class="detail-close" @click="toClose">
+            <span class="icon-close"></span>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script>
+import Star from './Star'
 export default {
   data () {
     return {
-      goodsData: {}
+      // 商品数据
+      goodsData: {},
+      // 公告详情显示状态
+      isShow: false
     }
   },
   props: {},
-  components: {},
+  components: {
+    'app-star': Star
+  },
   computed: {
+    // 头部背景图
     header_background () {
       return `background-image: url('${this.goodsData.head_pic_url}');`
     },
+    // 店面图标
     theme_background () {
       return `background-image: url('${this.goodsData.pic_url}');`
+    },
+    // 公告详情背景图
+    detail_background () {
+      return `background-image: url('${this.goodsData.poi_back_pic_url}');`
     }
   },
-  methods: {},
+  methods: {
+    // 公告详情显示
+    toShow () {
+      this.isShow = true
+    },
+    // 公告详情关闭
+    toClose () {
+      this.isShow = false
+    }
+  },
   created () {
+    // 获取商品数据
     this.$axios.get('/api/goods').then((res) => {
       console.log(res.data.data.poi_info)
       this.goodsData = res.data.data.poi_info
@@ -227,6 +282,123 @@ export default {
           color: #fff;
         }
       }
+    }
+    /*公告详情*/
+    .detail{
+      width: 100%;
+      height: 100%;
+      z-index: 999;
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      background: rgba(98, 98, 98, 0.8);
+      .detail-box{
+        width: 100%;
+        height: 100%;
+        padding: 45px 20px 130px;
+        box-sizing: border-box;
+        .detail-content{
+          width: 100%;
+          height: 100%;
+          background-size: 100% 100%;
+          border-radius: 10px;
+          text-align: center;
+          overflow: hidden;
+          .detail-img{
+            width: 60px;
+            height: 60px;
+            background-size: 135% 100%;
+            background-position: center;
+            margin: auto;
+            margin-top: 40px;
+            border-radius: 5px;
+          }
+          .detail-name{
+            font-size: 15px;
+            color: #fff;
+            margin-top: 13px;
+          }
+          .detail-star{
+            height: 10px;
+            margin-top: 6px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            .star{
+              display: block;
+              margin-right: 7px;
+            }
+            span{
+              font-size: 10px;
+              color: #fff;
+            }
+          }
+          .detail-tip{
+            font-size: 11px;
+            color: #bababc;
+            margin-top: 8px;
+            i{
+              margin: 0 7px;
+            }
+          }
+          .detail-time{
+            font-size: 11px;
+            color: #bababc;
+            margin-top: 13px;
+          }
+          .detail-discounts{
+            margin-top: 20px;
+            padding: 0 20px;
+            p{
+              padding-top: 20px;
+              border-top: 1px solid #BABABC;
+              img{
+                width: 16px;
+                height: 16px;
+                vertical-align: middle;
+              }
+              span{
+                font-size: 11px;
+                line-height: 16px;
+                color: white;
+              }
+            }
+          }
+        }
+        .detail-close{
+          padding-top: 20px;
+          height: 40px;
+          text-align: center;
+          span{
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            border-radius: 50%;
+            font-size: 14px;
+            color: #fff;
+            display: inline-block;
+            background: rgba(118, 118, 118, 0.7);
+            border: 1px solid rgba(140, 140, 140, 0.9);
+          }
+        }
+      }
+    }
+    /* 动画效果 */
+    .bulletin-detail-enter-active,
+    .bulletin-detail-leave-active {
+      transition: 2s all;
+    }
+
+    .bulletin-detail-enter,
+    .bulletin-detail-leave-to {
+      opacity: 0;
+    }
+
+    .bulletin-detail-enter-to,
+    .bulletin-detail-leave {
+      opacity: 1;
     }
   }
 </style>
