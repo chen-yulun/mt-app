@@ -115,7 +115,6 @@ export default {
   created () {
     // 获取商品数据
     this.$axios.get('/api/goods').then((res) => {
-      console.log(res.data.data.poi_info)
       this.goodsData = res.data.data.poi_info
     })
   },
