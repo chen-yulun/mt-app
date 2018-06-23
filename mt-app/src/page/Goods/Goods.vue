@@ -3,13 +3,19 @@
     <!--菜单栏-->
     <div class="menu" ref="menuScroll">
       <ul>
-        <li class="menu-item">
+        <li class="menu-item"
+            :class="{currentActive: currentIndex === 0}"
+            @click="selectMenu(0)">
           <p class="menu-text">
             <img class="icon" :src="fieldData.tag_icon" v-if="fieldData.tag_icon">
             {{fieldData.tag_name}}
           </p>
         </li>
-        <li class="menu-item" v-for="(food, index) in foodData" :key="index">
+        <li class="menu-item"
+            v-for="(food, index) in foodData"
+            :key="index"
+            :class="{currentActive: currentIndex === index+1}"
+            @click="selectMenu(index+1)">
           <p class="menu-text">
             <img class="icon" :src="food.icon" v-if="food.icon">
             {{food.name}}
@@ -21,13 +27,13 @@
     <div class="food" ref="foodScroll">
       <ul>
         <!--专场-->
-        <li class="food-field-list">
+        <li class="food-field-list food-list-hook">
           <div class="list-img" v-for="(field, index) in fieldData.operation_source_list" :key="index">
             <img :src="field.pic_url">
           </div>
         </li>
         <!--其余商品栏-->
-        <li class="food-item" v-for="(column, index) in foodData" :key="index">
+        <li class="food-item food-list-hook" v-for="(column, index) in foodData" :key="index">
           <h3 class="food-title">{{column.name}}</h3>
           <!--具体商品列表-->
           <ul>
@@ -52,11 +58,14 @@
         </li>
       </ul>
     </div>
+    <!--购物车-->
+    <!--<GoodsShopCar></GoodsShopCar>-->
   </div>
 </template>
 
 <script>
 import BScroll from 'better-scroll'
+import GoodsShopCar from './GoodsShopCar'
 export default {
   data () {
     return {
@@ -65,24 +74,67 @@ export default {
       // 食品数据
       foodData: '',
       // 专属数据
-      specialData: ''
+      specialData: '',
+      // 高度列表
+      heightList: '',
+      // 当前滚动高度
+      scrollY: ''
     }
   },
-  components: {},
+  components: {
+    GoodsShopCar
+  },
   computed: {
+    // 判断当前所在商品区间
+    currentIndex () {
+      for (let i = 0; i < this.heightList.length; i++) {
+        // 获取商品区间的范围
+        let height1 = this.heightList[i]
+        let height2 = this.heightList[i + 1]
+
+        // 是否在上述区间中
+        if (!height2 || (this.scrollY >= height1 && this.scrollY <= height2)) {
+          return i
+        }
+      }
+      return 0
+    }
   },
   methods: {
     // 计算属性是不能够接收参数，所以采用方法绑定图片属性
     foodImg (imgName) {
       return 'background-image: url(' + imgName + ');'
     },
+    // 初始化滚动
     initScroll () {
       this.menuScroll = new BScroll(this.$refs.menuScroll, {
         click: true
       })
       this.foodScroll = new BScroll(this.$refs.foodScroll, {
-        click: true
+        click: true,
+        probeType: 3 // 实时监控滚动距离
       })
+      this.foodScroll.on('scroll', (pos) => {
+        this.scrollY = Math.abs(Math.round(pos.y))
+      })
+    },
+    // 计算商品栏目高度
+    calculateHeight () {
+      let list = this.$refs.foodScroll.getElementsByClassName('food-list-hook')
+      let heightList = []
+      let height = 0
+      heightList.push(height)
+      for (let i = 0; i < list.length; i++) {
+        height += list[i].clientHeight
+        heightList.push(height)
+      }
+      this.heightList = heightList
+    },
+    // 菜单跳转
+    selectMenu (index) {
+      let list = this.$refs.foodScroll.getElementsByClassName('food-list-hook')
+      let element = list[index]
+      this.foodScroll.scrollToElement(element, 250)
     }
   },
   created () {
@@ -93,6 +145,7 @@ export default {
       this.specialData = res.data.data.poi_info
       this.$nextTick(() => {
         this.initScroll()
+        this.calculateHeight()
       })
     })
   },
@@ -118,6 +171,9 @@ export default {
       .menu-item{
         padding: 16px 23px 15px 10px;
         border-bottom: 1px solid #E4E4E4;
+      }
+      .currentActive{
+        background: #fff;
       }
       .menu-text{
         font-size: 13px;
