@@ -20,6 +20,10 @@
             <img class="icon" :src="food.icon" v-if="food.icon">
             {{food.name}}
           </p>
+          <!--使用方法代替计算属性，因为要传参-->
+          <i class="num" v-show="calculateCount(food.spus)">
+            {{calculateCount(food.spus)}}
+          </i>
         </li>
       </ul>
     </div>
@@ -52,29 +56,32 @@
                   <span class="unit">/{{food.unit}}</span>
                 </p>
               </div>
-              <div class="food-number"></div>
+              <div class="food-control">
+                <CarControl :food="food"></CarControl>
+              </div>
             </li>
           </ul>
         </li>
       </ul>
     </div>
     <!--购物车-->
-    <!--<GoodsShopCar></GoodsShopCar>-->
+    <GoodsShopCar :specialData="specialData" :selectFoods="selectFoods"></GoodsShopCar>
   </div>
 </template>
 
 <script>
 import BScroll from 'better-scroll'
 import GoodsShopCar from './GoodsShopCar'
+import CarControl from '../../components/CarControl'
 export default {
   data () {
     return {
-      // 专场数据
-      fieldData: '',
+      // 专场数据(注意，如果是要传给子组件，则数据类型要定义准确)
+      fieldData: {},
       // 食品数据
-      foodData: '',
+      foodData: [],
       // 专属数据
-      specialData: '',
+      specialData: {},
       // 高度列表
       heightList: '',
       // 当前滚动高度
@@ -82,7 +89,8 @@ export default {
     }
   },
   components: {
-    GoodsShopCar
+    GoodsShopCar,
+    CarControl
   },
   computed: {
     // 判断当前所在商品区间
@@ -98,6 +106,18 @@ export default {
         }
       }
       return 0
+    },
+    // 所选择的商品
+    selectFoods () {
+      let foods = []
+      this.foodData.forEach((myfoods) => {
+        myfoods.spus.forEach((food) => {
+          if (food.count > 0) {
+            foods.push(food)
+          }
+        })
+      })
+      return foods
     }
   },
   methods: {
@@ -135,6 +155,16 @@ export default {
       let list = this.$refs.foodScroll.getElementsByClassName('food-list-hook')
       let element = list[index]
       this.foodScroll.scrollToElement(element, 250)
+    },
+    // 所选商品数量
+    calculateCount (item) {
+      let count = 0
+      item.forEach((food) => {
+        if (food.count > 0) {
+          count += food.count
+        }
+      })
+      return count
     }
   },
   created () {
@@ -171,6 +201,7 @@ export default {
       .menu-item{
         padding: 16px 23px 15px 10px;
         border-bottom: 1px solid #E4E4E4;
+        position: relative;
       }
       .currentActive{
         background: #fff;
@@ -189,6 +220,19 @@ export default {
           height: 15px;
           vertical-align: middle;
         }
+      }
+      .num{
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        background: red;
+        color: #fff;
+        text-align: center;
+        font-size: 7px;
+        line-height: 13px;
       }
     }
     /*商品栏*/
@@ -221,6 +265,7 @@ export default {
           .food-list{
             display: flex;
             margin-bottom: 25px;
+            position: relative;
             .food-picture{
               flex: 0 0 63px;
               background-position: center;
@@ -273,6 +318,11 @@ export default {
                   color: #BFBFBF;
                 }
               }
+            }
+            .food-control{
+              position: absolute;
+              right: 0;
+              bottom: 0;
             }
           }
         }
