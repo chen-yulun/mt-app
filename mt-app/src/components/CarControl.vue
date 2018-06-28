@@ -3,11 +3,11 @@
     <transition name="move">
       <div class="car-decrease icon-remove_circle_outline"
            v-show="food.count"
-           @click="decreaseCar">
+           @click.stop.prevent="decreaseCar">
       </div>
     </transition>
     <div class="car-count" v-show="food.count">{{food.count}}</div>
-    <div class="car-add icon-add_circle" @click="increaseCar">
+    <div class="car-add icon-add_circle" @click.stop.prevent="increaseCar">
       <i class="bg"></i>
     </div>
   </div>

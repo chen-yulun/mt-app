@@ -41,7 +41,7 @@
           <h3 class="food-title">{{column.name}}</h3>
           <!--具体商品列表-->
           <ul>
-            <li class="food-list" v-for="(food, index) in column.spus" :key="index">
+            <li class="food-list" v-for="(food, index) in column.spus" :key="index" @click="showDetail(food)">
               <div class="food-picture" :style="foodImg(food.picture)"></div>
               <div class="food-describe">
                 <h3 class="food-name">{{food.name}}</h3>
@@ -66,6 +66,8 @@
     </div>
     <!--购物车-->
     <GoodsShopCar :specialData="specialData" :selectFoods="selectFoods"></GoodsShopCar>
+    <!--商品详情-->
+    <GoodsDetail :food="chooseFood" ref="foodView"></GoodsDetail>
   </div>
 </template>
 
@@ -73,6 +75,7 @@
 import BScroll from 'better-scroll'
 import GoodsShopCar from './GoodsShopCar'
 import CarControl from '../../components/CarControl'
+import GoodsDetail from './GoodsDetail'
 export default {
   data () {
     return {
@@ -85,12 +88,14 @@ export default {
       // 高度列表
       heightList: '',
       // 当前滚动高度
-      scrollY: ''
+      scrollY: '',
+      chooseFood: {}
     }
   },
   components: {
     GoodsShopCar,
-    CarControl
+    CarControl,
+    GoodsDetail
   },
   computed: {
     // 判断当前所在商品区间
@@ -165,6 +170,11 @@ export default {
         }
       })
       return count
+    },
+    // 所选择展示商品
+    showDetail (food) {
+      this.chooseFood = food
+      this.$refs.foodView.show()
     }
   },
   created () {

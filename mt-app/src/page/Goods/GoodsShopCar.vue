@@ -3,7 +3,7 @@
     <div class="shop-wrapper">
       <!--购物车左侧-->
       <div class="shop-left">
-        <div class="logo-wrapper" :class="{hightLigh: totalCount > 0}">
+        <div class="logo-wrapper" :class="{hightLigh: totalCount > 0}" @click="showList">
           <span class="icon-shopping_cart shop-logo" :class="{hightLigh: totalCount > 0}"></span>
           <i class="shop-num" v-show="totalCount">{{totalCount}}</i>
         </div>
@@ -15,31 +15,48 @@
       <!--购物车右侧-->
       <div class="shop-right" :class="{hightLigh: totalCount > 0}">{{payStr}}</div>
       <!--购物车列表-->
-      <div class="car-list">
-        <div class="list-top">{{specialData.discounts2[0].info}}</div>
+      <div class="car-list" :class="{listBlock: listShow}" v-show="listShow">
+        <div class="list-top" v-if="specialData.discounts2">{{specialData.discounts2[0].info}}</div>
         <div class="list-header">
           <h3 class="header-left">1号口袋</h3>
-          <div class="header-right">
+          <div class="header-right" @click="clearAll">
             <img src="../../assets/img/ash_bin.png" alt="">
             <span>清空购物车</span>
           </div>
         </div>
-        <div class="list-content">
+        <div class="list-content" ref="listContent">
           <ul>
-            <li></li>
+            <li class="content" v-for="(select, index) in selectFoods" :key="index">
+              <div class="con-left">
+                <div class="des-left">
+                  <p class="name">{{select.name}}</p>
+                  <p class="unit" v-show="!select.description">{{select.unit}}</p>
+                  <p class="description" v-show="!select.unit">{{select.description}}</p>
+                </div>
+                <div class="des-right">
+                  ￥{{select.min_price}}
+                </div>
+              </div>
+              <div class="con-right">
+                <CarControl :food="select"></CarControl>
+              </div>
+            </li>
           </ul>
         </div>
       </div>
     </div>
     <!--背景遮罩-->
-    <div class="cover"></div>
+    <div class="cover" v-show="listShow" @click="hideCover"></div>
   </div>
 </template>
 
 <script>
+import CarControl from '../../components/CarControl'
+import BScroll from 'better-scroll'
 export default {
   data () {
     return {
+      show: false
     }
   },
   props: {
@@ -50,8 +67,11 @@ export default {
       type: Array
     }
   },
-  components: {},
+  components: {
+    CarControl
+  },
   computed: {
+    // 商品总数
     totalCount () {
       let num = 0
       this.selectFoods.forEach((food) => {
@@ -59,6 +79,7 @@ export default {
       })
       return num
     },
+    // 商品总价
     totalPrice () {
       let total = 0
       this.selectFoods.forEach((food) => {
@@ -66,15 +87,56 @@ export default {
       })
       return total
     },
+    // 是否选有商品的不同显示值
     payStr () {
       if (this.totalCount > 0) {
         return '去结算'
       } else {
         return this.specialData.min_price_tip
       }
+    },
+    // 商品列表显示状态
+    listShow () {
+      // 如果没有选择商品，则不会显示
+      if (!this.totalCount) {
+        return false
+      }
+      // 根据当前状态设置列表滚动
+      if (this.show) {
+        this.$nextTick(() => {
+          if (!this.listScroll) {
+            this.listScroll = new BScroll(this.$refs.listContent, {
+              click: true
+            })
+          } else {
+            this.listScroll.refresh()
+          }
+        })
+      }
+      // 如果有选择商品，则根据是否点击了购物车的状态来判断是否显示列表
+      return this.show
     }
   },
-  methods: {},
+  methods: {
+    // 展示购物车列表
+    showList () {
+      // 判断购物车个数是否为空
+      if (!this.totalCount) {
+        return
+      }
+      this.show = !this.show
+    },
+    // 隐藏遮罩
+    hideCover () {
+      this.show = false
+    },
+    // 清空购物车
+    clearAll () {
+      this.selectFoods.forEach((food) => {
+        food.count = 0
+      })
+    }
+  },
   created () {},
   mounted () {
   },
@@ -165,6 +227,7 @@ export default {
       left: 0;
       top: 0;
       width: 100%;
+      z-index: -1;
       .list-top{
         height: 30px;
         text-align: center;
@@ -173,8 +236,77 @@ export default {
         line-height: 30px;
         color: #646158;
       }
-      .list-header{}
-      .list-content{}
+      .list-header{
+        height: 30px;
+        width: 100%;
+        background: #F4F4F4;
+        .header-left{
+          float: left;
+          line-height: 30px;
+          font-size: 12px;
+          border-left: 4px solid #53c123;
+          padding-left: 6px;
+        }
+        .header-right{
+          float: right;
+          line-height: 30px;
+          margin-right: 10px;
+          font-size: 0;
+          img{
+            height: 14px;
+            margin-right: 9px;
+            vertical-align: middle;
+          }
+          span{
+            font-size: 12px;
+            vertical-align: middle;
+          }
+        }
+      }
+      .list-content{
+        max-height: 360px;
+        overflow: hidden;
+        background: #fff;
+        .content{
+          overflow: hidden;
+          height: 38px;
+          padding: 12px 12px 11px 12px;
+          border-bottom: 1px solid #F4F4F4;
+          .con-left{
+            overflow: hidden;
+            float: left;
+            width: 240px;
+            .des-left{
+              float: left;
+              width: 170px;
+              .name{
+                font-size: 16px;
+                margin-bottom: 8px;
+                /* 超出部分隐藏*/
+                -webkit-line-clamp: 1;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                height: 16px;
+              }
+              .unit,.description{
+                font-size: 12px;
+                color: #B4B4B4;
+              }
+            }
+            .des-right{
+              float: right;
+            }
+          }
+          .con-right{
+            float: right;
+            margin-top: 6px;
+          }
+        }
+      }
+    }
+    .listBlock{
+      transform: translateY(-100%);
     }
   }
   .cover{
