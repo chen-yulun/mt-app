@@ -5,7 +5,7 @@
       <i class="line"></i>
     </router-link>
     <router-link class="ratings" to="/ratings">
-      评价
+      评价({{commentNum}})
       <i class="line"></i>
     </router-link>
     <router-link class="seller" to="/seller">
@@ -19,6 +19,11 @@
 export default {
   data () {
     return {
+    }
+  },
+  props: {
+    commentNum: {
+      type: Number
     }
   },
   components: {},

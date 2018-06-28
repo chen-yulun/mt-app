@@ -1,8 +1,10 @@
 <template>
   <div id="app">
     <app-header></app-header>
-    <app-nav></app-nav>
-    <router-view/>
+    <app-nav :commentNum="commentNum"></app-nav>
+    <keep-alive>
+      <router-view/>
+    </keep-alive>
   </div>
 </template>
 
@@ -14,7 +16,7 @@ export default {
   data () {
     return {
       // 商品数据
-      goodsData: {}
+      commentNum: 0
     }
   },
   components: {
@@ -23,6 +25,9 @@ export default {
   },
   created () {
     // 获取商品数据
+    this.$axios.get('/api/ratings').then((res) => {
+      this.commentNum = res.data.data.comment_num
+    })
   }
 }
 </script>
